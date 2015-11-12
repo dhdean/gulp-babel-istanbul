@@ -3,6 +3,7 @@
     "bitwise": true,
     "camelcase": true,
     "eqeqeq": true,
+    "esnext": true,
     "forin": true,
     "freeze": true,
     "immed": true,
