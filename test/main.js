@@ -26,6 +26,13 @@ describe('gulp-babel-istanbul', function () {
     contents: fs.readFileSync('test/fixtures/lib/add.js')
   });
 
+  var subLibFile = new gutil.File({
+    path: 'test/fixtures/lib/subtract.js',
+    cwd: 'test/',
+    base: 'test/fixtures/lib',
+    contents: fs.readFileSync('test/fixtures/lib/subtract.js')
+  });
+
   describe('istanbul()', function () {
     beforeEach(function () {
       this.stream = istanbul();
@@ -109,6 +116,18 @@ describe('gulp-babel-istanbul', function () {
       stream.write(libFile);
       stream.end();
     });
+    it('clear covered files from require.cache', function (done) {
+      var sub1 = require('./fixtures/lib/subtract');
+      var stream = istanbul()
+        .pipe(istanbul.hookRequire())
+        .on('finish', function () {
+          var sub2 = require('./fixtures/lib/subtract');
+          assert.notEqual(sub1, sub2);
+          done();
+        });
+      stream.write(subLibFile);
+      stream.end();
+    });
   });
 
   describe('istanbul.summarizeCoverage()', function () {
@@ -124,10 +143,15 @@ describe('gulp-babel-istanbul', function () {
             .on('end', function () {
               var data = istanbul.summarizeCoverage();
               process.stdout.write = out;
-              assert.equal(data.lines.pct, 75);
-              assert.equal(data.statements.pct, 75);
-              assert.equal(data.functions.pct, 50);
-              assert.equal(data.branches.pct, 100);
+              try {
+                assert.equal(data.lines.pct, 75);
+                assert.equal(data.statements.pct, 80);
+                assert.equal(data.functions.pct, 50);
+                assert.equal(data.branches.pct, 100);
+              } catch (err) {
+                done(err);
+                return;
+              }
               done();
             });
         });
@@ -151,13 +175,17 @@ describe('gulp-babel-istanbul', function () {
                   coverageVariable: COV_VAR
               });
               process.stdout.write = out;
-
               // If untested files are included, line and statement coverage
               // drops to 25%
-              assert.equal(data.lines.pct, 37.5);
-              assert.equal(data.statements.pct, 37.5);
-              assert.equal(data.functions.pct, 25);
-              assert.equal(data.branches.pct, 100);
+              try {
+                assert.equal(data.lines.pct, 50);
+                assert.equal(data.statements.pct, 57.14);
+                assert.equal(data.functions.pct, 33.33);
+                assert.equal(data.branches.pct, 100);
+              } catch (err) {
+                done(err);
+                return;
+              }
               done();
             });
         });
