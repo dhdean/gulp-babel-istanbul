@@ -1,68 +1,44 @@
-gulp-babel-istanbul [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][depstat-image]][depstat-url]
-===========================
+# gulp-babel-istanbul
+
+[![NPM Version][npm-image]][npm-url]
+[![NPM Downloads][downloads-image]][downloads-url]
 
 [Babel][babel] ES2015 transpiling and [Istanbul][istanbul] unit test coverage plugin for [gulp][gulp].
 
 Works on top of any Node.js unit test framework.
 
-Installation
----------------
+## Installation
 
-```shell
-npm install --save-dev gulp-babel-istanbul
-```
+	npm install gulp-babel-istanbul --save-dev
 
-Example
----------------
+## Example
 
 In your `gulpfile.js`:
 
 #### Node.js testing
 
-If your code is ES2015, but your actual unit tests are ES5, then use the following:
+The following example is a sort of "kitchen sink" example of how to use
+`gulp-babel-istanbul`.
 
 ```javascript
-var istanbul = require('gulp-babel-istanbul');
-// We'll use mocha here, but any test framework will work
-var mocha = require('gulp-mocha');
-
-gulp.task('test', function (cb) {
-  gulp.src(['lib/**/*.js', 'main.js'])
-    .pipe(istanbul()) // Covering files
-    .pipe(istanbul.hookRequire()) // Force `require` to return covered files
-    .on('finish', function () {
-      gulp.src(['test/*.js'])
-        .pipe(mocha())
-        .pipe(istanbul.writeReports()) // Creating the reports after tests ran
-        .pipe(istanbul.enforceThresholds({ thresholds: { global: 90 } })) // Enforce a coverage of at least 90%
-        .on('end', cb);
-    });
-});
-```
-
-If both your code and unit tests are ES2015, then grab [gulp-babel][gulp-babel] and
-[merge-stream][merge-stream], then do this:
-
-```javascript
-var istanbul = require('gulp-babel-istanbul');
-var mocha = require('gulp-mocha');
 var babel = require('gulp-babel');
-var mergeStream = require('merge-stream');
+var istanbul = require('gulp-babel-istanbul');
+var injectModules = require('gulp-inject-modules');
+var mocha = require('gulp-mocha');
 
-gulp.task('test', function (cb) {
-  mergeStream(
-    gulp.src(['lib/**/*.js', 'main.js'])
-      .pipe(istanbul()),
-    gulp.src(['test/*.js'])
-      .pipe(babel())
-  ).pipe(istanbul.hookRequire())
-    .on('finish', function () {
-      gulp.src(['test/*.js'])
-       .pipe(mocha())
-       .pipe(istanbul.writeReports()) // Creating the reports after tests ran
-       .pipe(istanbul.enforceThresholds({ thresholds: { global: 90 } })) // Enforce a coverage of at least 90%
-       .on('end', cb);
-    });
+gulp.task('coverage', function (cb) {
+  gulp.src('src/**/*.js')
+	.pipe(istanbul())
+	.pipe(istanbul.hookRequire()) // or you could use .pipe(injectModules())
+	.on('finish', function () {
+	  gulp.src('test/**/*.js')
+		.pipe(babel())
+		.pipe(injectModules())
+		.pipe(mocha())
+		.pipe(babelIstanbul.writeReports())
+		.pipe(babelIstanbul.enforceThresholds({ thresholds: { global: 90 } }))
+		.on('end', cb);
+	});
 });
 ```
 
@@ -73,7 +49,6 @@ gulp.task('test', function (cb) {
 For browser testing, you'll need to write the files covered by istanbul in a directory from where you'll serve these files to the browser running the test. You'll also need a way to extract the value of the [coverage variable](#coveragevariable) after the test have runned in the browser.
 
 Browser testing is hard. If you're not sure what to do, then I suggest you take a look at [Karma test runner](http://karma-runner.github.io) - it has built-in coverage using Istanbul.
-
 
 ```javascript
 var istanbul = require('gulp-babel-istanbul');
@@ -328,14 +303,11 @@ License
 [istanbul]: http://gotwarlost.github.io/istanbul/
 [gulp]: https://github.com/gulpjs/gulp
 
+[npm-image]: https://img.shields.io/npm/v/gulp-babel-istanbul.svg
 [npm-url]: https://npmjs.org/package/gulp-babel-istanbul
-[npm-image]: https://badge.fury.io/js/gulp-babel-istanbul.svg
 
-[travis-url]: http://travis-ci.org/cb1kenobi/gulp-babel-istanbul
-[travis-image]: https://secure.travis-ci.org/cb1kenobi/gulp-babel-istanbul.svg?branch=master
-
-[depstat-url]: https://david-dm.org/cb1kenobi/gulp-babel-istanbul
-[depstat-image]: https://david-dm.org/cb1kenobi/gulp-babel-istanbul.svg
+[downloads-image]: https://img.shields.io/npm/dm/gulp-babel-istanbul.svg
+[downloads-url]: https://npmjs.org/package/gulp-babel-istanbul
 
 [istanbul-coverage-variable]: http://gotwarlost.github.io/istanbul/public/apidocs/classes/Instrumenter.html
 [istanbul-summarize-coverage]: http://gotwarlost.github.io/istanbul/public/apidocs/classes/ObjectUtils.html#method_summarizeCoverage
@@ -345,4 +317,3 @@ License
 [babel-istanbul]: https://www.npmjs.com/package/babel-istanbul
 
 [gulp-babel]: https://www.npmjs.com/package/gulp-babel
-[merge-stream]: https://www.npmjs.com/package/merge-stream
