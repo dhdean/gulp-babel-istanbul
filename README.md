@@ -2,6 +2,8 @@
 
 [![NPM Version][npm-image]][npm-url]
 [![NPM Downloads][downloads-image]][downloads-url]
+[![Deps][david-image]][david-url]
+[![Dev Deps][david-dev-image]][david-dev-url]
 
 [Babel][babel] ES2015 transpiling and [Istanbul][istanbul] unit test coverage plugin for [gulp][gulp].
 
@@ -36,7 +38,6 @@ gulp.task('coverage', function (cb) {
 		.pipe(injectModules())
 		.pipe(mocha())
 		.pipe(babelIstanbul.writeReports())
-		.pipe(babelIstanbul.enforceThresholds({ thresholds: { global: 90 } }))
 		.on('end', cb);
 	});
 });
@@ -235,61 +236,12 @@ See also:
 
 ### istanbul.enforceThresholds(opt)
 
-Checks coverage against minimum acceptable thresholds. Fails the build if any of the thresholds are not met.
+This was disabled in v1.0.0 because it used [istanbul-threshold-checker][istanbul-threshold-checker]
+v0.1.0 which used Istanbul v0.3.x. The Handlebars helpers used by this old version of Istanbul's
+reporters would override the helpers defined by babel-istanbul. Obviously that's not good.
 
-#### opt
-Type: `Object` (optional)
-```js
-{
-  coverageVariable: 'someVariable',
-  thresholds: {
-    global: 60,
-    each: -10
-  }
-}
-```
-
-##### coverageVariable
-Type: `String` (optional)
-Default: `'$$cov_' + new Date().getTime() + '$$'`
-
-The global variable istanbul uses to store coverage
-
-
-##### thresholds
-Type: `Object` (required)
-
-Minimum acceptable coverage thresholds. Any coverage values lower than the specified threshold will fail the build.
-
-Each threshold value can be:
-- A positive number - used as a percentage
-- A negative number - used as the maximum amount of coverage gaps
-- A falsey value will skip the coverage
-
-Thresholds can be specified across all files (`global`) or per file (`each`):
-```
-{
-  global: 80,
-  each: 60
-}
-```
-
-You can also specify a value for each metric:
-```
-{
-  global: {
-    statements: 80,
-    branches: 90,
-    lines: 70,
-    functions: -10
-  }
-  each: {
-    statements: 100,
-    branches: 70,
-    lines: -20
-  }
-}
-```
+For now, it just acts a passthrough. It has no effect. This full functionality may
+return someday. PRs welcome.
 
 #### emits
 
@@ -317,3 +269,10 @@ License
 [babel-istanbul]: https://www.npmjs.com/package/babel-istanbul
 
 [gulp-babel]: https://www.npmjs.com/package/gulp-babel
+
+[istanbul-threshold-checker]: https://www.npmjs.com/package/istanbul-threshold-checker
+
+[david-image]: https://img.shields.io/david/cb1kenobi/gulp-babel-istanbul.svg
+[david-url]: https://david-dm.org/cb1kenobi/gulp-babel-istanbul
+[david-dev-image]: https://img.shields.io/david/dev/cb1kenobi/gulp-babel-istanbul.svg
+[david-dev-url]: https://david-dm.org/cb1kenobi/gulp-babel-istanbul#info=devDependencies
